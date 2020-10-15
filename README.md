@@ -48,8 +48,8 @@ adapter = TunneledHTTPAdapter(
 session = Session()
 
 # connect adapter for requests.Session instance
-session.mount("http://", self.adapter)
-session.mount("https://", self.adapter)
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 ```
 
 Request to `howsmyssl.com`:
