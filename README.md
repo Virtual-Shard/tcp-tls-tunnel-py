@@ -21,8 +21,7 @@ tunnel_opts = TunnelOptions(
             auth_password="YOUR_PASSWORD",
             secure=True,  # HEADER: secure value True or False
             client=Client.CHROME,  # HEADER: imitated Client that will be used
-            server_name=None  # indicates which hostname it is attempting to connect to at the start of the handshaking process.
-        )
+       )
 
 # if needed
 proxy_opts = ProxyOptions(
