@@ -19,8 +19,8 @@ tunnel_opts = TunnelOptions(
             port=1337,  # tunnel port
             auth_login="YOUR_LOGIN",
             auth_password="YOUR_PASSWORD",
-            secure=True,  # HEADER: secure value True or False
-            client=Client.CHROME,  # HEADER: imitated Client that will be used
+            secure=True,  # True - TLS, False - TCP
+            client=Client.CHROME,  # imitated Client that will be used
        )
 
 # if needed
