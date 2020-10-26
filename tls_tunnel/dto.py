@@ -15,7 +15,6 @@ class TunnelOptions:
     client: str = Client.CHROME
     secure: bool = False
     http2: bool = False
-    server_name: str = None
 
 
 @dataclass

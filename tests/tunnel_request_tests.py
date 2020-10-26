@@ -23,8 +23,6 @@ class TestHowsMySSLRequest(unittest.TestCase):
         )
         self.adapter = TunneledHTTPAdapter(
             tunnel_opts=self.tunnel_opts,
-            dest_host="howsmyssl.com",
-            dest_port=443,
         )
         self.session = requests.Session()
         self.session.headers.update(urllib3.make_headers(

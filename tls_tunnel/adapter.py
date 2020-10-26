@@ -15,6 +15,7 @@ from tls_tunnel.utils import generate_basic_header, generate_proxy_url
 def create_tunnel_connection(tunnel_opts: TunnelOptions,
                              dest_host: str,
                              dest_port: int,
+                             server_name: str = None,
                              proxy: ProxyOptions = None):
     conn = HTTPConnection(tunnel_opts.host, tunnel_opts.port)
     headers = {
@@ -22,7 +23,7 @@ def create_tunnel_connection(tunnel_opts: TunnelOptions,
                                                tunnel_opts.auth_password),
         "Client": tunnel_opts.client,
         "Connection": 'keep-alive',
-        "Server-Name": tunnel_opts.server_name or dest_host,
+        "Server-Name": server_name or dest_host,
         "Host": tunnel_opts.host,
         "Secure": str(int(tunnel_opts.secure)),
         "HTTP2": str(int(tunnel_opts.http2)),
@@ -60,6 +61,7 @@ class TunneledHTTPAdapter(BaseAdapter):
             tunnel_opts=self.tunnel_opts,
             dest_host=parsed_url.hostname,
             dest_port=destination_port,
+            server_name=parsed_url.hostname,
             proxy=self.proxy
         )
 
