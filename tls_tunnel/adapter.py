@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import requests
 
 import requests.cookies
@@ -51,10 +53,17 @@ class TunneledHTTPAdapter(BaseAdapter):
         pass
 
     def send(self, request, **kwargs):
+        parsed_url = urlparse(request.url)
+
+        if parsed_url.port:
+            destination_port = parsed_url.port
+        else:
+            destination_port = 443 if self.tunnel_opts.secure else 80
+
         connection = create_tunnel_connection(
             tunnel_opts=self.tunnel_opts,
-            dest_host=self.dest_host,
-            dest_port=self.dest_port,
+            dest_host=parsed_url.hostname,
+            dest_port=destination_port,
             proxy=self.proxy
         )
 
