@@ -40,9 +40,7 @@ from tls_tunnel.adapter import TunneledHTTPAdapter
 
 adapter = TunneledHTTPAdapter(
             tunnel_opts=tunnel_opts,
-            dest_host="howsmyssl.com",  # for example 
-            dest_port=443,  # HTTP - 80 | HTTPS - 443
-            proxy_options=proxy_opts  # or None if not required
+            proxy_opts=proxy_opts  # or None if not required
         )
 
 session = Session()

@@ -40,14 +40,10 @@ class TunneledHTTPAdapter(BaseAdapter):
 
     def __init__(self,
                  tunnel_opts: TunnelOptions,
-                 dest_host: str,
-                 dest_port: int,
-                 proxy_options: ProxyOptions = None):
+                 proxy_opts: ProxyOptions = None):
         super(BaseAdapter, self).__init__()
         self.tunnel_opts = tunnel_opts
-        self.dest_host = dest_host
-        self.dest_port = dest_port
-        self.proxy = proxy_options
+        self.proxy = proxy_opts
 
     def close(self):
         pass
