@@ -12,7 +12,7 @@ class TunnelOptions:
     auth_password: str = None
 
     # headers options
-    client: str = Client.CHROME
+    client: Client = Client.CHROME
     secure: bool = False
     http2: bool = False
 

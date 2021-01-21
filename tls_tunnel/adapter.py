@@ -21,7 +21,7 @@ def create_tunnel_connection(tunnel_opts: TunnelOptions,
     headers = {
         "Authorization": generate_basic_header(tunnel_opts.auth_login,
                                                tunnel_opts.auth_password),
-        "Client": tunnel_opts.client,
+        "Client": tunnel_opts.client.value,
         "Connection": 'keep-alive',
         "Server-Name": server_name or dest_host,
         "Host": tunnel_opts.host,
