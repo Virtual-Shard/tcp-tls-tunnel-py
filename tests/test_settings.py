@@ -9,7 +9,7 @@ TEST_PROXY_PASSWORD = os.environ.get("TEST_PROXY_PASSWORD")
 
 # Tunnel configuration
 TEST_TUNNEL_HOST = os.environ.get("TEST_TUNNEL_HOST", "104.248.43.30")
-TEST_TUNNEL_PORT = int(os.environ.get("TEST_TUNNEL_PORT", "1337"))
+TEST_TUNNEL_PORT = os.environ.get("TEST_TUNNEL_PORT", "1337")
 TEST_TUNNEL_LOGIN = os.environ.get("TEST_TUNNEL_LOGIN", "test1")
 TEST_TUNNEL_PASSWORD = os.environ.get("TEST_TUNNEL_PASSWORD", "467jw2d53x82FAGHSw")
 
