@@ -36,6 +36,4 @@ jobs:
           TEST_TUNNEL_LOGIN: ${{ secrets.TEST_TUNNEL_LOGIN }}
           TEST_TUNNEL_PASSWORD: ${{ secrets.TEST_TUNNEL_PASSWORD }}
         run: |
-
-          echo $TEST_TUNNEL_PORT
           python -m unittest -v tests/*_tests.py
