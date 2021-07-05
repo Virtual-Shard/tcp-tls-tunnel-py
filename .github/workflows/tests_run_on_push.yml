@@ -1,5 +1,11 @@
 name: run-tests
-on: [push]
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+
 jobs:
   test-adapters-functionality:
     runs-on: ubuntu-latest
@@ -12,6 +18,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --upgrade build
-      - name: Build required package
-        run: python -m build
+          if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi
+      - name: Code static analysis with flake8
+        run: |
+          flake8 tls_tunnel/ --count --select=E5,E9,F63,F7,F82 -ignore=E24,W504 --show-source --statistic
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 tls_tunnel/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Run test cases
+        run: |
+          python -m unittest -v tests/*_tests.py

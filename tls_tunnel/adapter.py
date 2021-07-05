@@ -1,4 +1,3 @@
-import json
 from urllib.parse import urlparse
 
 import requests
@@ -82,10 +81,17 @@ class TunneledHTTPAdapter(BaseAdapter):
             response.request = request
             response.connection = connection
 
-            # Added content to response (under the hood it will set r.text and allow r.json() operation)
+            # Added content to response
+            # (under the hood it will set r.text and allow r.json() operation)
             response._content = r.read()
-            response.encoding = requests.utils.get_encoding_from_headers(response.headers)
-            requests.cookies.extract_cookies_to_jar(response.cookies, request, r)
+            response.encoding = requests.utils.get_encoding_from_headers(
+                response.headers
+            )
+            requests.cookies.extract_cookies_to_jar(
+                response.cookies,
+                request,
+                r
+            )
         finally:
             connection.close()
 
