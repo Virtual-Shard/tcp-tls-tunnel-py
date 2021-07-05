@@ -7,11 +7,11 @@ README = (BASE_DIR / "README.md").read_text()
 
 setup(
     name="tls-tunnel",
-    version='0.2',
+    version='0.3',
     description="TLS TCP tunnel for HTTP requests",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/Arteha/tcp-tls-tunnel-py",
+    url="https://github.com/Virtual-Shard/tcp-tls-tunnel-py",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
