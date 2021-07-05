@@ -6,6 +6,7 @@ import unittest
 
 import urllib3
 
+from tests import test_settings
 from tls_tunnel.adapter import TunneledHTTPAdapter
 from tls_tunnel.dto import TunnelOptions
 
@@ -14,10 +15,10 @@ class TestHowsMySSLRequest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.tunnel_opts = TunnelOptions(
-            host="104.248.43.30",
-            port=1337,
-            auth_login="test1",
-            auth_password="467jw2d53x82FAGHSw",
+            host=test_settings.TEST_TUNNEL_HOST,
+            port=test_settings.TEST_TUNNEL_PORT,
+            auth_login=test_settings.TEST_TUNNEL_LOGIN,
+            auth_password=test_settings.TEST_TUNNEL_PASSWORD,
             secure=True,
 
         )
@@ -29,7 +30,7 @@ class TestHowsMySSLRequest(unittest.TestCase):
             keep_alive=True,
             disable_cache=True,
             accept_encoding=True,
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+            user_agent=test_settings.USER_AGENT
         ))
 
         # connect adapter for requests.Session instance
@@ -78,6 +79,7 @@ class TestHowsMySSLRequest(unittest.TestCase):
     def test_several_tunnel_requests(self):
 
         for url in ["https://www.howsmyssl.com/",
+                    "https://www.howsmyssl.com/",
                     "https://www.howsmyssl.com/s/about.html"]:
             response = self.session.get(url)
             self.assertEqual(response.status_code, 200)
