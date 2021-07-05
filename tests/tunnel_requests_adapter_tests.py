@@ -9,7 +9,7 @@ import urllib3
 from requests import Response
 
 from tests import test_settings
-from tls_tunnel.adapter import TunneledHTTPAdapter
+from tls_tunnel.requests_adapter import TunneledHTTPAdapter
 from tls_tunnel.dto import TunnelOptions, ProxyOptions
 
 
