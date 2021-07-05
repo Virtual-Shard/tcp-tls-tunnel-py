@@ -3,6 +3,7 @@ import os
 
 # Proxy configuration
 TEST_PROXY_HOST = os.environ.get("TEST_PROXY_HOST")
+print(os.environ.get("TEST_PROXY_PORT"))
 TEST_PROXY_PORT = int(os.environ.get("TEST_PROXY_PORT", 80))
 TEST_PROXY_LOGIN = os.environ.get("TEST_PROXY_LOGIN")
 TEST_PROXY_PASSWORD = os.environ.get("TEST_PROXY_PASSWORD")
