@@ -10,10 +10,10 @@ from tls_tunnel.utils import generate_basic_header
 logging.basicConfig(level=logging.DEBUG)
 
 proxy = httpx.Proxy(
-    url="https://104.248.43.30:1337",
+    url="https://test1:467jw2d53x82FAGHSw@104.248.43.30:1337",
     mode="TUNNEL_ONLY",
     headers={
-        "Authorization": generate_basic_header("test1", "467jw2d53x82FAGHSw"),
+        # "Authorization": generate_basic_header("test1", "467jw2d53x82FAGHSw"),
         "Client": "CHROME",
         "Connection": 'keep-alive',
         "Server-Name": "howsmyssl.com",
