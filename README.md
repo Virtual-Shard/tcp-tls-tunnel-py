@@ -33,14 +33,15 @@ proxy_opts = ProxyOptions(
 ```
 
 Then we can create tunnnel adapter:
+
 ```python
 from requests import Session
-from tls_tunnel.adapter import TunneledHTTPAdapter
+from tls_tunnel.requests_adapter import TunneledHTTPAdapter
 
 adapter = TunneledHTTPAdapter(
-            tunnel_opts=tunnel_opts,
-            proxy_opts=proxy_opts  # or None if not required
-        )
+    tunnel_opts=tunnel_opts,
+    proxy_opts=proxy_opts  # or None if not required
+)
 
 session = Session()
 

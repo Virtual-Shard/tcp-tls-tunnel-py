@@ -14,7 +14,11 @@ def generate_proxy_url(proxy: ProxyOptions):
         proxy_host_port: str = f"{proxy.host}:{proxy.port}"
 
         if proxy.auth_login and proxy.auth_password:
-            return f"{proxy.auth_login}:{proxy.auth_password}@{proxy_host_port}"
+            return (
+                f"{proxy.auth_login}:"
+                f"{proxy.auth_password}@"
+                f"{proxy_host_port}"
+            )
         else:
             return proxy_host_port
     return None

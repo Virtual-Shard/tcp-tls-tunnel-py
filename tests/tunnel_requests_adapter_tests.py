@@ -1,3 +1,4 @@
+from http.client import OK, NOT_FOUND
 from typing import List
 
 import jsondiff
@@ -5,31 +6,70 @@ import requests
 import unittest
 
 import urllib3
+from requests import Response
 
-from tls_tunnel.adapter import TunneledHTTPAdapter
-from tls_tunnel.dto import TunnelOptions
+from tests import test_settings
+from tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tls_tunnel.dto import TunnelOptions, ProxyOptions
 
 
-class TestHowsMySSLRequest(unittest.TestCase):
+class TestTunnelRequestWithProxy(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.tunnel_opts = TunnelOptions(
-            host="104.248.43.30",
-            port=1337,
-            auth_login="test1",
-            auth_password="467jw2d53x82FAGHSw",
-            secure=True,
-
-        )
         self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=self.tunnel_opts,
+            tunnel_opts=TunnelOptions(
+                host=test_settings.TEST_TUNNEL_HOST,
+                port=test_settings.TEST_TUNNEL_PORT,
+                auth_login=test_settings.TEST_TUNNEL_LOGIN,
+                auth_password=test_settings.TEST_TUNNEL_PASSWORD,
+                secure=True,
+            ),
+            proxy_opts=ProxyOptions(
+                host=test_settings.TEST_PROXY_HOST,
+                port=test_settings.TEST_PROXY_PORT,
+                auth_login=test_settings.TEST_PROXY_LOGIN,
+                auth_password=test_settings.TEST_PROXY_PASSWORD,
+            )
         )
         self.session = requests.Session()
         self.session.headers.update(urllib3.make_headers(
             keep_alive=True,
             disable_cache=True,
             accept_encoding=True,
-            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'
+            user_agent=test_settings.USER_AGENT
+        ))
+
+        # connect adapter for requests.Session instance
+        self.session.mount("http://", self.adapter)
+        self.session.mount("https://", self.adapter)
+
+    def test_tunnel_request_with_proxy(self):
+        pass
+        # response: Response = self.session.get("https://www.google.com/")
+        # self.assertEqual(response.status_code, OK)
+
+    def test_several_requests_with_proxy_sequentially(self):
+        pass
+
+
+class TestHowsMySSLRequest(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.adapter = TunneledHTTPAdapter(
+            tunnel_opts=TunnelOptions(
+                host=test_settings.TEST_TUNNEL_HOST,
+                port=test_settings.TEST_TUNNEL_PORT,
+                auth_login=test_settings.TEST_TUNNEL_LOGIN,
+                auth_password=test_settings.TEST_TUNNEL_PASSWORD,
+                secure=True,
+            )
+        )
+        self.session = requests.Session()
+        self.session.headers.update(urllib3.make_headers(
+            keep_alive=True,
+            disable_cache=True,
+            accept_encoding=True,
+            user_agent=test_settings.USER_AGENT
         ))
 
         # connect adapter for requests.Session instance
@@ -76,14 +116,14 @@ class TestHowsMySSLRequest(unittest.TestCase):
                          msg="[given_cipher_suites] TLS_GREASE_IS DELETE parameter check failed.")
 
     def test_several_tunnel_requests(self):
-
         for url in ["https://www.howsmyssl.com/",
+                    "https://www.howsmyssl.com/s/api.html",
                     "https://www.howsmyssl.com/s/about.html"]:
-            response = self.session.get(url)
-            self.assertEqual(response.status_code, 200)
+            response: Response = self.session.get(url)
+            self.assertEqual(response.status_code, OK)
 
-        failed_response = self.session.get("https://www.howsmyssl.com/s/api")
-        self.assertEqual(failed_response.status_code, 404)
+        failed_response: Response = self.session.get("https://www.howsmyssl.com/s/api")
+        self.assertEqual(failed_response.status_code, NOT_FOUND)
 
 
 if __name__ == '__main__':
