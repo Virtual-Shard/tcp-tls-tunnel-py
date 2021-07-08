@@ -2,46 +2,27 @@ from http.client import OK, NOT_FOUND
 from typing import List
 
 import jsondiff
-import requests
 import unittest
 
-import urllib3
 from requests import Response
 
-from tests import test_settings
+from tests.test_utils import (
+    get_test_tunnel_options,
+    get_test_proxy_options,
+    get_test_requests_session
+)
+from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
 from tls_tunnel.requests_adapter import TunneledHTTPAdapter
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
 
 
 class TestTunnelRequestWithProxy(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=TunnelOptions(
-                host=test_settings.TEST_TUNNEL_HOST,
-                port=test_settings.TEST_TUNNEL_PORT,
-                auth_login=test_settings.TEST_TUNNEL_LOGIN,
-                auth_password=test_settings.TEST_TUNNEL_PASSWORD,
-                secure=True,
-            ),
-            proxy_opts=ProxyOptions(
-                host=test_settings.TEST_PROXY_HOST,
-                port=test_settings.TEST_PROXY_PORT,
-                auth_login=test_settings.TEST_PROXY_LOGIN,
-                auth_password=test_settings.TEST_PROXY_PASSWORD,
-            )
+            tunnel_opts=get_test_tunnel_options(),
+            proxy_opts=get_test_proxy_options()
         )
-        self.session = requests.Session()
-        self.session.headers.update(urllib3.make_headers(
-            keep_alive=True,
-            disable_cache=True,
-            accept_encoding=True,
-            user_agent=test_settings.USER_AGENT
-        ))
-
-        # connect adapter for requests.Session instance
-        self.session.mount("http://", self.adapter)
-        self.session.mount("https://", self.adapter)
+        self.session = get_test_requests_session(adapter=self.adapter)
 
     def test_tunnel_request_with_proxy(self):
         pass
@@ -52,62 +33,18 @@ class TestTunnelRequestWithProxy(unittest.TestCase):
         pass
 
 
-class TestHowsMySSLRequest(unittest.TestCase):
+class TestHTTP11HowsMySSLRequest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=TunnelOptions(
-                host=test_settings.TEST_TUNNEL_HOST,
-                port=test_settings.TEST_TUNNEL_PORT,
-                auth_login=test_settings.TEST_TUNNEL_LOGIN,
-                auth_password=test_settings.TEST_TUNNEL_PASSWORD,
-                secure=True,
-            )
+            tunnel_opts=get_test_tunnel_options()
         )
-        self.session = requests.Session()
-        self.session.headers.update(urllib3.make_headers(
-            keep_alive=True,
-            disable_cache=True,
-            accept_encoding=True,
-            user_agent=test_settings.USER_AGENT
-        ))
-
-        # connect adapter for requests.Session instance
-        self.session.mount("http://", self.adapter)
-        self.session.mount("https://", self.adapter)
+        self.session = get_test_requests_session(adapter=self.adapter)
 
     def test_tunnel_request(self):
         response_json: dict = self.session.get('https://www.howsmyssl.com/a/check').json()
-        validation_json: dict = {
-            'given_cipher_suites': [
-                'TLS_GREASE_IS_THE_WORD_AA',
-                'TLS_AES_128_GCM_SHA256',
-                'TLS_AES_256_GCM_SHA384',
-                'TLS_CHACHA20_POLY1305_SHA256',
-                'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
-                'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
-                'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
-                'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
-                'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256',
-                'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256',
-                'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA',
-                'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA',
-                'TLS_RSA_WITH_AES_128_GCM_SHA256',
-                'TLS_RSA_WITH_AES_256_GCM_SHA384',
-                'TLS_RSA_WITH_AES_128_CBC_SHA',
-                'TLS_RSA_WITH_AES_256_CBC_SHA'
-            ],
-            'ephemeral_keys_supported': True,
-            'session_ticket_supported': True,
-            'tls_compression_supported': False,
-            'unknown_cipher_suite_supported': False,
-            'beast_vuln': False,
-            'able_to_detect_n_minus_one_splitting': False,
-            'insecure_cipher_suites': {},
-            'tls_version': 'TLS 1.3',
-            'rating': 'Probably Okay'}
 
-        diff: dict = jsondiff.diff(validation_json, response_json)
+        diff: dict = jsondiff.diff(HOWSMYSSL_VALIDATION_RESPONSE, response_json)
         given_cipher_suites: List[str] = diff["given_cipher_suites"]
 
         self.assertEqual(len(given_cipher_suites[jsondiff.symbols.insert]), 1,

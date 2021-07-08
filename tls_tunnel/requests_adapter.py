@@ -5,6 +5,7 @@ import requests
 import requests.cookies
 import requests.utils
 from http.client import HTTPConnection
+# from hyper import HTTPConnection
 from requests.structures import CaseInsensitiveDict
 from requests.adapters import BaseAdapter
 
