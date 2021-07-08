@@ -1,0 +1,30 @@
+
+HOWSMYSSL_VALIDATION_RESPONSE = {
+            'given_cipher_suites': [
+                'TLS_GREASE_IS_THE_WORD_AA',
+                'TLS_AES_128_GCM_SHA256',
+                'TLS_AES_256_GCM_SHA384',
+                'TLS_CHACHA20_POLY1305_SHA256',
+                'TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256',
+                'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256',
+                'TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+                'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384',
+                'TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256',
+                'TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256',
+                'TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA',
+                'TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA',
+                'TLS_RSA_WITH_AES_128_GCM_SHA256',
+                'TLS_RSA_WITH_AES_256_GCM_SHA384',
+                'TLS_RSA_WITH_AES_128_CBC_SHA',
+                'TLS_RSA_WITH_AES_256_CBC_SHA'
+            ],
+            'ephemeral_keys_supported': True,
+            'session_ticket_supported': True,
+            'tls_compression_supported': False,
+            'unknown_cipher_suite_supported': False,
+            'beast_vuln': False,
+            'able_to_detect_n_minus_one_splitting': False,
+            'insecure_cipher_suites': {},
+            'tls_version': 'TLS 1.3',
+            'rating': 'Probably Okay',
+}
