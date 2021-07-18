@@ -31,7 +31,11 @@ def _create_tunnel(proxy_host: str,
                  headers=proxy_headers)
 
     resp = conn.get_response()
-    proto = resp.headers.get("Alpn-Protocol")[0].decode('utf-8')
+
+    try:
+        proto = resp.headers.get("Alpn-Protocol")[0].decode('utf-8')
+    except TypeError:
+        proto = 'http/1.1'
 
     if resp.status != 200:
         raise ProxyError(

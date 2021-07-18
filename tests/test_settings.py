@@ -1,5 +1,7 @@
 import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Proxy configuration
 TEST_PROXY_HOST = os.environ.get("TEST_PROXY_HOST")

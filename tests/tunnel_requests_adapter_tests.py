@@ -6,6 +6,7 @@ import unittest
 
 from requests import Response
 
+from tests.test_settings import TEST_TUNNEL_HOST
 from tests.test_utils import (
     get_test_tunnel_options,
     get_test_proxy_options,
@@ -61,6 +62,14 @@ class TestHTTP11HowsMySSLRequest(unittest.TestCase):
 
         failed_response: Response = self.session.get("https://www.howsmyssl.com/s/api")
         self.assertEqual(failed_response.status_code, NOT_FOUND)
+
+    def test_http_without_tls_tunnel_request(self):
+        response: Response = self.session.get("http://httpbin.org/get")
+
+        response_json: dict = response.json()
+
+        self.assertEqual(response.status_code, OK)
+        self.assertEqual(response_json.get("origin"), TEST_TUNNEL_HOST)
 
 
 if __name__ == '__main__':
