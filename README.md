@@ -5,49 +5,52 @@ requests using the overridden `BaseAdapter` from the `requests` library.
 
 ## Usage examples
 
-Let's show, how it works for `requests`.
-
-We should import required modules and declare options:
-```python
-
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
-from tls_tunnel.constants import Client
-
-
-tunnel_opts = TunnelOptions(
-            host="127.0.0.1",  # tunnel address
-            port=1337,  # tunnel port
-            auth_login="YOUR_LOGIN",
-            auth_password="YOUR_PASSWORD",
-            secure=True,  # True - TLS, False - TCP
-            client=Client.CHROME,  # imitated Client that will be used
-       )
-
-# if needed
-proxy_opts = ProxyOptions(
-        host="your.proxy.host",
-        port=1234,
-        auth_login="YOUR_LOGIN",
-        auth_password="YOUR_PASSWORD",
-)
-```
-
-Then we can create tunnnel adapter:
+Let's show, how it works for `requests`:
 
 ```python
 from requests import Session
 from tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tls_tunnel.constants import Client
+from tls_tunnel.dto import TunnelOptions, ProxyOptions
 
-adapter = TunneledHTTPAdapter(
-    tunnel_opts=tunnel_opts,
+
+# if necessary
+proxy_opts = ProxyOptions(
+    host="your.proxy.host",
+    port=1234,
+    auth_login="YOUR_LOGIN",
+    auth_password="YOUR_PASSWORD",
+)
+
+httpAdapter = TunneledHTTPAdapter(
+    tunnel_opts=TunnelOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+        secure=True,  # True - TLS, False - TCP
+        client=Client.CHROME,  # imitated Client that will be used
+    ),
+    proxy_opts=proxy_opts  # or None if not required
+)
+
+httpsAdapter = TunneledHTTPAdapter(
+    tunnel_opts=TunnelOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+        secure=False,  # True - TLS, False - TCP
+        client=Client.CHROME,  # imitated Client that will be used
+    ),
     proxy_opts=proxy_opts  # or None if not required
 )
 
 session = Session()
 
 # connect adapter for requests.Session instance
-session.mount("http://", adapter)
-session.mount("https://", adapter)
+session.mount("http://", httpAdapter)
+session.mount("https://", httpsAdapter)
 ```
 
 Request to `howsmyssl.com`:

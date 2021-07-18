@@ -9,15 +9,14 @@ from requests import Response
 from tests.test_settings import TEST_TUNNEL_HOST
 from tests.test_utils import get_test_tunnel_options, get_test_requests_session
 from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
-from tls_tunnel.hyper_http2_adapter import CustomHTTP20Adapter
+from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
 
 
 class TestHTTP20Requests(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.adapter = CustomHTTP20Adapter(
-            tunnel_opts=get_test_tunnel_options(secure=True,
-                                                http2=True)
+        self.adapter = TunnelHTTP20Adapter(
+            adapter_opts=get_test_tunnel_options(secure=True, http2=True)
         )
         self.session = get_test_requests_session(adapter=self.adapter)
 

@@ -10,7 +10,7 @@ from hyper.common.util import to_native_string
 from hyper.contrib import HTTP20Adapter
 from hyper.tls import init_context
 
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
+from tls_tunnel.dto import ProxyOptions, AdapterOptions
 from tls_tunnel.utils import generate_basic_header
 
 
@@ -43,14 +43,14 @@ def _create_tunnel(proxy_host: str,
     return getattr(conn, "_sock"), proto
 
 
-class CustomHTTP20Adapter(HTTP20Adapter):
+class TunnelHTTP20Adapter(HTTP20Adapter):
     def __init__(self,
                  window_manager=None,
-                 tunnel_opts: TunnelOptions = None,
+                 adapter_opts: AdapterOptions = None,
                  proxy_opts: ProxyOptions = None,
                  *args, **kwargs):
-        super(CustomHTTP20Adapter, self).__init__(window_manager=window_manager, *args, **kwargs)
-        self.tunnel_opts = tunnel_opts
+        super(TunnelHTTP20Adapter, self).__init__(window_manager=window_manager, *args, **kwargs)
+        self.adapter_opts = adapter_opts
         self.proxy_opts = proxy_opts
 
     def get_connection(self, host, port, scheme, cert=None, verify=True,
@@ -101,7 +101,7 @@ class CustomHTTP20Adapter(HTTP20Adapter):
                 proxy_host=proxy_netloc,
                 proxy_headers=proxy_headers,
                 timeout=timeout,
-                tunnel_opts=self.tunnel_opts,
+                adapter_opts=self.adapter_opts,
                 proxy_opts=self.proxy_opts
             )
             self.connections[connection_key] = conn
@@ -120,7 +120,7 @@ class CustomHTTPConnection(HTTPConnection):
                  proxy_port=None,
                  proxy_headers=None,
                  timeout=None,
-                 tunnel_opts: TunnelOptions = None,
+                 adapter_opts: AdapterOptions = None,
                  proxy_opts: ProxyOptions = None,
                  **kwargs):
         super().__init__(host=host,
@@ -134,9 +134,9 @@ class CustomHTTPConnection(HTTPConnection):
                          proxy_headers=proxy_headers,
                          timeout=timeout,
                          **kwargs)
-        self._conn = CustomHTTP11Connection(
+        self._conn = TunnelHTTP11Connection(
             self._host, self._port,
-            tunnel_opts=tunnel_opts,
+            adapter_opts=adapter_opts,
             proxy_opts=proxy_opts,
             **self._h1_kwargs
         )
@@ -146,19 +146,19 @@ class CustomHTTPConnection(HTTPConnection):
         return False
 
 
-class CustomHTTP11Connection(HTTP11Connection):
+class TunnelHTTP11Connection(HTTP11Connection):
     def __init__(self, host, port=None, secure=None, ssl_context=None,
                  proxy_host=None, proxy_port=None, proxy_headers=None,
                  timeout=None,
-                 tunnel_opts: TunnelOptions = None,
+                 adapter_opts: AdapterOptions = None,
                  proxy_opts: ProxyOptions = None,
                  **kwargs):
-        super(CustomHTTP11Connection, self).__init__(host=host, port=port,
+        super(TunnelHTTP11Connection, self).__init__(host=host, port=port,
                                                      secure=secure, ssl_context=ssl_context,
                                                      proxy_host=proxy_host, proxy_port=proxy_port,
                                                      proxy_headers=proxy_headers, timeout=timeout,
                                                      **kwargs)
-        self.tunnel_opts = tunnel_opts
+        self.adapter_opts = adapter_opts
         self.proxy_opts = proxy_opts
 
     def connect(self):
@@ -178,22 +178,25 @@ class CustomHTTP11Connection(HTTP11Connection):
             sock, proto = _create_tunnel(
                 target_host=self.host,
                 target_port=self.port,
-                proxy_host=self.tunnel_opts.host,  # "104.248.43.30",
-                proxy_port=self.tunnel_opts.port,  # 1337,
+                proxy_host=self.adapter_opts.host,  # "104.248.43.30",
+                proxy_port=self.adapter_opts.port,  # 1337,
                 proxy_headers={
-                    "Authorization": generate_basic_header(self.tunnel_opts.auth_login,
-                                                           self.tunnel_opts.auth_password),
-                    "Client": self.tunnel_opts.client.value,
+                    "Authorization": generate_basic_header(self.adapter_opts.auth_login,
+                                                           self.adapter_opts.auth_password),
+                    "Client": self.adapter_opts.client.value,
                     "Connection": 'keep-alive',
                     "Server-Name": self.host,
                     "Host": self.host,
-                    "Secure": str(int(self.tunnel_opts.secure)),
-                    "HTTP2": str(int(self.tunnel_opts.http2)),
+                    "Secure": str(1 if self.secure is True else 0),
+                    "HTTP2": "1",
                 }
             )
 
             sock = BufferedSocket(sock, self.network_buffer_size)
             sock.settimeout(read_timeout)  # Set read timeout
+
+            if self.secure is not True:
+                proto = 'http/1.1'
 
             if proto not in ('http/1.1', None):
                 raise TLSUpgrade(proto, sock)
