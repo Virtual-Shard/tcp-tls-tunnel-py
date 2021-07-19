@@ -6,19 +6,17 @@ README = (BASE_DIR / "README.md").read_text()
 
 
 httpx_requirements = [
-    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
     "h2>=4.0",
     "httpx>=0.18.2",
 ]
 hyper_requirements = [
-    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
     "h2>=2.6.2,<3.0",
 ]
 
 
 setup(
     name="tls-tunnel",
-    version='0.5',
+    version='0.5.5',
     description="TLS TCP tunnel for HTTP requests",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -34,5 +32,8 @@ setup(
     extras_require={
         "httpx": httpx_requirements,
         "hyper": hyper_requirements,
-    }
+    },
+    dependency_links=[
+        'hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz'
+    ]
 )
