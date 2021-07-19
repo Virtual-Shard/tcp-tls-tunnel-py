@@ -49,9 +49,9 @@ def _create_tunnel(proxy_host: str,
 
 class TunnelHTTP20Adapter(HTTP20Adapter):
     def __init__(self,
-                 window_manager=None,
-                 adapter_opts: AdapterOptions = None,
+                 adapter_opts: AdapterOptions,
                  proxy_opts: ProxyOptions = None,
+                 window_manager=None,
                  *args, **kwargs):
         super(TunnelHTTP20Adapter, self).__init__(window_manager=window_manager, *args, **kwargs)
         self.adapter_opts = adapter_opts
@@ -98,15 +98,16 @@ class TunnelHTTP20Adapter(HTTP20Adapter):
             conn = self.connections[connection_key]
         except KeyError:
             conn = CustomHTTPConnection(
-                host, port,
+                self.adapter_opts,
+                self.proxy_opts,
+                host=host,
+                port=port,
                 secure=secure,
                 window_manager=self.window_manager,
                 ssl_context=ssl_context,
                 proxy_host=proxy_netloc,
                 proxy_headers=proxy_headers,
                 timeout=timeout,
-                adapter_opts=self.adapter_opts,
-                proxy_opts=self.proxy_opts
             )
             self.connections[connection_key] = conn
         return conn
@@ -114,7 +115,9 @@ class TunnelHTTP20Adapter(HTTP20Adapter):
 
 class CustomHTTPConnection(HTTPConnection):
     def __init__(self,
-                 host,
+                 adapter_opts: AdapterOptions,
+                 proxy_opts: ProxyOptions = None,
+                 host=None,
                  port=None,
                  secure=None,
                  window_manager=None,
@@ -124,8 +127,6 @@ class CustomHTTPConnection(HTTPConnection):
                  proxy_port=None,
                  proxy_headers=None,
                  timeout=None,
-                 adapter_opts: AdapterOptions = None,
-                 proxy_opts: ProxyOptions = None,
                  **kwargs):
         super().__init__(host=host,
                          port=port,
@@ -139,9 +140,10 @@ class CustomHTTPConnection(HTTPConnection):
                          timeout=timeout,
                          **kwargs)
         self._conn = TunnelHTTP11Connection(
-            self._host, self._port,
             adapter_opts=adapter_opts,
             proxy_opts=proxy_opts,
+            host=self._host,
+            port=self._port,
             **self._h1_kwargs
         )
 
@@ -151,11 +153,12 @@ class CustomHTTPConnection(HTTPConnection):
 
 
 class TunnelHTTP11Connection(HTTP11Connection):
-    def __init__(self, host, port=None, secure=None, ssl_context=None,
+    def __init__(self,
+                 adapter_opts: AdapterOptions,
+                 proxy_opts: ProxyOptions = None,
+                 host=None, port=None, secure=None, ssl_context=None,
                  proxy_host=None, proxy_port=None, proxy_headers=None,
                  timeout=None,
-                 adapter_opts: AdapterOptions = None,
-                 proxy_opts: ProxyOptions = None,
                  **kwargs):
         super(TunnelHTTP11Connection, self).__init__(host=host, port=port,
                                                      secure=secure, ssl_context=ssl_context,
