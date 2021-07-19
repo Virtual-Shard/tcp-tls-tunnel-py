@@ -117,7 +117,7 @@ Output:
 #### Installation
 
 ```shell
-pip install tls-tunnel[hyper]
+pip install 'tls-tunnel[hyper]'
 ```
 
 #### Example
@@ -169,7 +169,7 @@ Output:
 #### Installation
 
 ```shell
-pip install tls-tunnel[httpx]
+pip install 'tls-tunnel[httpx]'
 ```
 
 #### Example
