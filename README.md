@@ -1,12 +1,14 @@
 # TCP TLS Tunnel Adapter for Python
 
-Provides functionality for creating a TLS tunnel for HTTP / HTTPS 
-requests using the overridden `BaseAdapter` from the `requests` library.
+Provides functionality for creating a TCP-TLS tunnel for HTTP / HTTPS 
+requests. Currently supported libraries are `request`, `hyper` and `httpx`. 
+Our TLS Layer pass ciphers and has SSL session ticket support by default.
+If you are really interested in testing it for free, 
+you can find out more details in our [Discord Channel](https://discord.gg/4HRVxNP).
 
 ## Usage examples
 
-This section shows usage examples for HTTP/1.1 and HTTP/2.0,
-for both cases the adapters used within the `requests` library are available.
+These sections show usage examples for HTTP/1.1 and HTTP/2.0.
 
 ### Requests adapter (HTTP/1.1)
 

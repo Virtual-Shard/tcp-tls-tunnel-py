@@ -8,4 +8,3 @@ h11>=0.12.0
 h2>=2.6.2,<3.0
 hpack>=3.0.0,<4.0
 httpcore>=0.13.6
-hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz
