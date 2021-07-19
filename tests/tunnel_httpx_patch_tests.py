@@ -5,6 +5,11 @@ import pkg_resources
 if pkg_resources.get_distribution("h2").version < '4':
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'h2'])
 
+try:
+    pkg_resources.get_distribution("httpx")
+except pkg_resources.DistributionNotFound:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'httpx'])
+
 import unittest
 from http.client import OK, NOT_FOUND
 from typing import List

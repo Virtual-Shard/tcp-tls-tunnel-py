@@ -5,6 +5,11 @@ import pkg_resources
 if pkg_resources.get_distribution("h2").version != '2.6.2':
     subprocess.check_call([sys.executable, "-m", "pip", "install", 'h2==2.6.2'])
 
+try:
+    pkg_resources.get_distribution("hyper")
+except pkg_resources.DistributionNotFound:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz'])
+
 
 import unittest
 from http.client import OK, NOT_FOUND
