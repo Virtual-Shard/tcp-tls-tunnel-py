@@ -3,7 +3,7 @@ from tls_tunnel.constants import Client
 
 
 @dataclass
-class TunnelOptions:
+class AdapterOptions:
     host: str
     port: int
 
@@ -13,6 +13,10 @@ class TunnelOptions:
 
     # headers options
     client: Client = Client.CHROME
+
+
+@dataclass
+class TunnelOptions(AdapterOptions):
     secure: bool = False
     http2: bool = False
 

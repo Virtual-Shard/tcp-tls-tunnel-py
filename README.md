@@ -5,49 +5,64 @@ requests using the overridden `BaseAdapter` from the `requests` library.
 
 ## Usage examples
 
-Let's show, how it works for `requests`.
+This section shows usage examples for HTTP/1.1 and HTTP/2.0,
+for both cases the adapters used within the `requests` library are available.
 
-We should import required modules and declare options:
-```python
+### Requests adapter (HTTP/1.1)
 
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
-from tls_tunnel.constants import Client
+#### Installation
 
-
-tunnel_opts = TunnelOptions(
-            host="127.0.0.1",  # tunnel address
-            port=1337,  # tunnel port
-            auth_login="YOUR_LOGIN",
-            auth_password="YOUR_PASSWORD",
-            secure=True,  # True - TLS, False - TCP
-            client=Client.CHROME,  # imitated Client that will be used
-       )
-
-# if needed
-proxy_opts = ProxyOptions(
-        host="your.proxy.host",
-        port=1234,
-        auth_login="YOUR_LOGIN",
-        auth_password="YOUR_PASSWORD",
-)
+```shell
+pip install tls-tunnel
 ```
 
-Then we can create tunnnel adapter:
+#### Example
+Let's show, how it works for `requests` in case of HTTP/1.1:
 
 ```python
 from requests import Session
 from tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tls_tunnel.constants import Client
+from tls_tunnel.dto import TunnelOptions, ProxyOptions
 
-adapter = TunneledHTTPAdapter(
-    tunnel_opts=tunnel_opts,
+
+# if necessary
+proxy_opts = ProxyOptions(
+    host="your.proxy.host",
+    port=1234,
+    auth_login="YOUR_LOGIN",
+    auth_password="YOUR_PASSWORD",
+)
+
+httpAdapter = TunneledHTTPAdapter(
+    tunnel_opts=TunnelOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+        secure=True,  # True - TLS, False - TCP
+        client=Client.CHROME,  # imitated Client that will be used
+    ),
+    proxy_opts=proxy_opts  # or None if not required
+)
+
+httpsAdapter = TunneledHTTPAdapter(
+    tunnel_opts=TunnelOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+        secure=False,  # True - TLS, False - TCP
+        client=Client.CHROME,  # imitated Client that will be used
+    ),
     proxy_opts=proxy_opts  # or None if not required
 )
 
 session = Session()
 
 # connect adapter for requests.Session instance
-session.mount("http://", adapter)
-session.mount("https://", adapter)
+session.mount("http://", httpAdapter)
+session.mount("https://", httpsAdapter)
 ```
 
 Request to `howsmyssl.com`:
@@ -93,4 +108,118 @@ Output:
  'tls_compression_supported': False,
  'tls_version': 'TLS 1.3',
  'unknown_cipher_suite_supported': False}
+```
+
+### Requests adapter (HTTP/2.0 with hyper)
+
+#### Installation
+
+```shell
+pip install tls-tunnel[hyper]
+```
+
+#### Example
+Let's show, how it works for `requests` in case of HTTP/2.0:
+```python
+import requests
+from tls_tunnel.dto import ProxyOptions, AdapterOptions
+from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
+
+
+adapter = TunnelHTTP20Adapter(
+    proxy_opts=ProxyOptions(
+        host="your.proxy.host",
+        port=1234,
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+    ),
+    adapter_opts=AdapterOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+    ),
+)
+
+session = requests.Session()
+session.mount("http://", adapter)
+session.mount("https://", adapter)
+```
+
+Request to `http2.pro`:
+```python
+response = session.get("https://http2.pro/api/v1")
+print(response.json())
+```
+
+Output:
+```python
+{
+    'http2': 1, 
+    'protocol': 'HTTP/2.0', 
+    'push': 0, 
+    'user_agent': 'python-requests/2.24.0'
+}
+```
+
+### HTTPX Transport (HTTP/2.0)
+
+#### Installation
+
+```shell
+pip install tls-tunnel[httpx]
+```
+
+#### Example
+Let's show, how it works for `httpx` in case of HTTP/2.0:
+```python
+from tls_tunnel.dto import AdapterOptions, ProxyOptions
+from tls_tunnel.httpx_adapter import TunnelHTTPTransport
+
+transport = TunnelHTTPTransport(
+    adapter_opts=AdapterOptions(
+        host="127.0.0.1",  # tunnel address
+        port=1337,  # tunnel port
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+    ),
+    proxy_opts=ProxyOptions(
+        host="your.proxy.host",
+        port=1234,
+        auth_login="YOUR_LOGIN",
+        auth_password="YOUR_PASSWORD",
+    ),
+)
+```
+
+Request to `http2.pro`:
+```python
+from httpx import Client
+
+with Client(transport=transport) as client:
+    response = client.get("https://http2.pro/api/v1")
+    print(response.json())
+```
+
+Output:
+```python
+{
+    'http2': 1, 
+    'protocol': 'HTTP/2.0', 
+    'push': 0, 
+    'user_agent': 'python-httpx/0.18.2'
+}
+```
+
+## Tests
+
+In addition, you can try to run the tests that are available in the `tests` directory,
+there are more examples of using the right adapters.
+
+In order to use environment variables it is recommended to create directories with tests `.env` file,
+which will be used automatically at startup.
+
+You can do this with the command:
+```shell
+python -m unittest -v tests/*_tests.py
 ```

@@ -1,46 +1,51 @@
+import subprocess
+import sys
+
+import pkg_resources
+if pkg_resources.get_distribution("h2").version != '2.6.2':
+    subprocess.check_call([sys.executable, "-m", "pip", "install", 'h2==2.6.2'])
+
+try:
+    pkg_resources.get_distribution("hyper")
+except pkg_resources.DistributionNotFound:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz'])
+
+
+import unittest
 from http.client import OK, NOT_FOUND
 from typing import List
 
 import jsondiff
-import unittest
-
 from requests import Response
 
 from tests.test_settings import TEST_TUNNEL_HOST
-from tests.test_utils import (
-    get_test_tunnel_options,
-    get_test_proxy_options,
-    get_test_requests_session
-)
+from tests.test_utils import get_test_tunnel_options, get_test_requests_session
 from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
-from tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
 
 
-class TestTunnelRequestWithProxy(unittest.TestCase):
+class TestHTTP20Requests(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=get_test_tunnel_options(),
-            proxy_opts=get_test_proxy_options()
+        self.adapter = TunnelHTTP20Adapter(
+            adapter_opts=get_test_tunnel_options(secure=True, http2=True)
         )
         self.session = get_test_requests_session(adapter=self.adapter)
 
-    def test_tunnel_request_with_proxy(self):
-        pass
-        # response: Response = self.session.get("https://www.google.com/")
-        # self.assertEqual(response.status_code, OK)
+    def test_tunnel_ip_request(self):
+        response: Response = self.session.get("https://api.myip.com/")
+        self.assertEqual(response.status_code, OK)
 
-    def test_several_requests_with_proxy_sequentially(self):
-        pass
+        response_json: dict = response.json()
+        self.assertEqual(response_json.get("ip"), TEST_TUNNEL_HOST)
 
+    def test_http_without_tls_tunnel_request(self):
+        response: Response = self.session.get("http://httpbin.org/get")
 
-class TestHTTP11HowsMySSLRequest(unittest.TestCase):
+        response_json: dict = response.json()
 
-    def setUp(self) -> None:
-        self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=get_test_tunnel_options()
-        )
-        self.session = get_test_requests_session(adapter=self.adapter)
+        self.assertEqual(response.status_code, OK)
+        self.assertEqual(response_json.get("origin"), TEST_TUNNEL_HOST)
 
     def test_tunnel_request(self):
         response_json: dict = self.session.get('https://www.howsmyssl.com/a/check').json()
@@ -62,16 +67,3 @@ class TestHTTP11HowsMySSLRequest(unittest.TestCase):
 
         failed_response: Response = self.session.get("https://www.howsmyssl.com/s/api")
         self.assertEqual(failed_response.status_code, NOT_FOUND)
-
-    def test_http_without_tls_tunnel_request(self):
-        response: Response = self.session.get("http://httpbin.org/get")
-
-        response_json: dict = response.json()
-
-        self.assertEqual(response.status_code, OK)
-        self.assertEqual(response_json.get("origin"), TEST_TUNNEL_HOST)
-
-
-if __name__ == '__main__':
-    unittest.main()
-

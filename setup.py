@@ -5,9 +5,20 @@ BASE_DIR = pathlib.Path(__file__).parent
 README = (BASE_DIR / "README.md").read_text()
 
 
+httpx_requirements = [
+    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
+    "h2>=4.0",
+    "httpx>=0.18.2",
+]
+hyper_requirements = [
+    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
+    "h2>=2.6.2,<3.0",
+]
+
+
 setup(
     name="tls-tunnel",
-    version='0.4',
+    version='0.5',
     description="TLS TCP tunnel for HTTP requests",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -20,4 +31,8 @@ setup(
     ],
     include_package_data=True,
     packages=find_packages(exclude=("tests",)),
+    extras_require={
+        "httpx": httpx_requirements,
+        "hyper": hyper_requirements,
+    }
 )

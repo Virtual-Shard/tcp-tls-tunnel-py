@@ -9,6 +9,16 @@ on:
 jobs:
   test-adapters-functionality:
     runs-on: ubuntu-latest
+    env:
+      TEST_PROXY_HOST: ${{ secrets.TEST_PROXY_HOST }}
+      TEST_PROXY_PORT: ${{ secrets.TEST_PROXY_PORT }}
+      TEST_PROXY_LOGIN: ${{ secrets.TEST_PROXY_LOGIN }}
+      TEST_PROXY_PASSWORD: ${{ secrets.TEST_PROXY_PASSWORD }}
+
+      TEST_TUNNEL_HOST: ${{ secrets.TEST_TUNNEL_HOST }}
+      TEST_TUNNEL_PORT: ${{ secrets.TEST_TUNNEL_PORT }}
+      TEST_TUNNEL_LOGIN: ${{ secrets.TEST_TUNNEL_LOGIN }}
+      TEST_TUNNEL_PASSWORD: ${{ secrets.TEST_TUNNEL_PASSWORD }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -24,16 +34,9 @@ jobs:
           flake8 tls_tunnel/ --count --select=E5,E9,F63,F7,F82 --ignore=E501,E24,W504 --show-source --statistic
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 tls_tunnel/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      - name: Run test cases
-        env:
-          TEST_PROXY_HOST: ${{ secrets.TEST_PROXY_HOST }}
-          TEST_PROXY_PORT: ${{ secrets.TEST_PROXY_PORT }}
-          TEST_PROXY_LOGIN: ${{ secrets.TEST_PROXY_LOGIN }}
-          TEST_PROXY_PASSWORD: ${{ secrets.TEST_PROXY_PASSWORD }}
-
-          TEST_TUNNEL_HOST: ${{ secrets.TEST_TUNNEL_HOST }}
-          TEST_TUNNEL_PORT: ${{ secrets.TEST_TUNNEL_PORT }}
-          TEST_TUNNEL_LOGIN: ${{ secrets.TEST_TUNNEL_LOGIN }}
-          TEST_TUNNEL_PASSWORD: ${{ secrets.TEST_TUNNEL_PASSWORD }}
+      - name: Run test cases - Requests
         run: |
           python -m unittest -v tests/*_tests.py
+      - name: Run test cases - Httpx
+        run: |
+          python -m unittest -v tests/*_tests_opt.py
