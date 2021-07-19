@@ -2,13 +2,16 @@ import subprocess
 import sys
 
 import pkg_resources
-if pkg_resources.get_distribution("h2").version < '4':
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'h2'])
 
 try:
     pkg_resources.get_distribution("httpx")
 except pkg_resources.DistributionNotFound:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'httpx'])
+    hyper_dist = "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz"
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", hyper_dist, 'httpx'])
+
+if pkg_resources.get_distribution("h2").version < '4':
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", 'h2'])
+
 
 import unittest
 from http.client import OK, NOT_FOUND
