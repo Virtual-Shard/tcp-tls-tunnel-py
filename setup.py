@@ -6,12 +6,10 @@ README = (BASE_DIR / "README.md").read_text()
 
 
 httpx_requirements = [
-    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
     "h2>=4.0",
     "httpx>=0.18.2",
 ]
 hyper_requirements = [
-    "hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz",
     "h2>=2.6.2,<3.0",
 ]
 
