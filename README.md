@@ -117,8 +117,6 @@ Output:
 #### Installation
 
 ```shell
-# it is important step for http2 usage
-pip install hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz
 pip install tls-tunnel[hyper]
 ```
 
@@ -171,8 +169,6 @@ Output:
 #### Installation
 
 ```shell
-# it is important step for http2 usage
-pip install hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz  
 pip install tls-tunnel[httpx]
 ```
 
