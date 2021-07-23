@@ -1,12 +1,14 @@
 # TCP TLS Tunnel Adapter for Python
 
-Provides functionality for creating a TLS tunnel for HTTP / HTTPS 
-requests using the overridden `BaseAdapter` from the `requests` library.
+Provides functionality for creating a TCP-TLS tunnel for HTTP / HTTPS 
+requests. Currently supported libraries are `request`, `hyper` and `httpx`. 
+Our TLS Layer pass ciphers and has SSL session ticket support by default.
+If you are really interested in testing it for free, 
+you can find out more details in our [Discord Channel](https://discord.gg/4HRVxNP).
 
 ## Usage examples
 
-This section shows usage examples for HTTP/1.1 and HTTP/2.0,
-for both cases the adapters used within the `requests` library are available.
+These sections show usage examples for HTTP/1.1 and HTTP/2.0.
 
 ### Requests adapter (HTTP/1.1)
 
@@ -21,9 +23,9 @@ Let's show, how it works for `requests` in case of HTTP/1.1:
 
 ```python
 from requests import Session
-from tls_tunnel.requests_adapter import TunneledHTTPAdapter
-from tls_tunnel.constants import Client
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
+from tcp_tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tcp_tls_tunnel.constants import Client
+from tcp_tls_tunnel.dto import AdapterOptions, ProxyOptions
 
 
 # if necessary
@@ -34,25 +36,12 @@ proxy_opts = ProxyOptions(
     auth_password="YOUR_PASSWORD",
 )
 
-httpAdapter = TunneledHTTPAdapter(
-    tunnel_opts=TunnelOptions(
+adapter = TunneledHTTPAdapter(
+    adapter_opts=AdapterOptions(
         host="127.0.0.1",  # tunnel address
         port=1337,  # tunnel port
         auth_login="YOUR_LOGIN",
         auth_password="YOUR_PASSWORD",
-        secure=True,  # True - TLS, False - TCP
-        client=Client.CHROME,  # imitated Client that will be used
-    ),
-    proxy_opts=proxy_opts  # or None if not required
-)
-
-httpsAdapter = TunneledHTTPAdapter(
-    tunnel_opts=TunnelOptions(
-        host="127.0.0.1",  # tunnel address
-        port=1337,  # tunnel port
-        auth_login="YOUR_LOGIN",
-        auth_password="YOUR_PASSWORD",
-        secure=False,  # True - TLS, False - TCP
         client=Client.CHROME,  # imitated Client that will be used
     ),
     proxy_opts=proxy_opts  # or None if not required
@@ -61,8 +50,8 @@ httpsAdapter = TunneledHTTPAdapter(
 session = Session()
 
 # connect adapter for requests.Session instance
-session.mount("http://", httpAdapter)
-session.mount("https://", httpsAdapter)
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 ```
 
 Request to `howsmyssl.com`:
@@ -115,17 +104,15 @@ Output:
 #### Installation
 
 ```shell
-# it is important step for http2 usage
-pip install hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz
-pip install tls-tunnel[hyper]
+pip install 'tls-tunnel[hyper]'
 ```
 
 #### Example
 Let's show, how it works for `requests` in case of HTTP/2.0:
 ```python
 import requests
-from tls_tunnel.dto import ProxyOptions, AdapterOptions
-from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
+from tcp_tls_tunnel.dto import ProxyOptions, AdapterOptions
+from tcp_tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
 
 
 adapter = TunnelHTTP20Adapter(
@@ -169,16 +156,14 @@ Output:
 #### Installation
 
 ```shell
-# it is important step for http2 usage
-pip install hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz  
-pip install tls-tunnel[httpx]
+pip install 'tls-tunnel[httpx]'
 ```
 
 #### Example
 Let's show, how it works for `httpx` in case of HTTP/2.0:
 ```python
-from tls_tunnel.dto import AdapterOptions, ProxyOptions
-from tls_tunnel.httpx_adapter import TunnelHTTPTransport
+from tcp_tls_tunnel.dto import AdapterOptions, ProxyOptions
+from tcp_tls_tunnel.httpx_adapter import TunnelHTTPTransport
 
 transport = TunnelHTTPTransport(
     adapter_opts=AdapterOptions(

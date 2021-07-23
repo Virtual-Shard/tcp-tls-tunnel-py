@@ -4,47 +4,20 @@ import requests
 
 import requests.cookies
 import requests.utils
-from http.client import HTTPConnection
-# from hyper import HTTPConnection
 from requests.structures import CaseInsensitiveDict
 from requests.adapters import BaseAdapter
 
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
-from tls_tunnel.utils import generate_basic_header, generate_proxy_url
-
-
-def create_tunnel_connection(tunnel_opts: TunnelOptions,
-                             dest_host: str,
-                             dest_port: int,
-                             server_name: str = None,
-                             proxy: ProxyOptions = None):
-    conn = HTTPConnection(tunnel_opts.host, tunnel_opts.port)
-    headers = {
-        "Authorization": generate_basic_header(tunnel_opts.auth_login,
-                                               tunnel_opts.auth_password),
-        "Client": tunnel_opts.client.value,
-        "Connection": 'keep-alive',
-        "Server-Name": server_name or dest_host,
-        "Host": tunnel_opts.host,
-        "Secure": str(int(tunnel_opts.secure)),
-        "HTTP2": str(int(tunnel_opts.http2)),
-    }
-
-    if proxy:
-        headers["Proxy"] = generate_proxy_url(proxy=proxy)
-
-    conn.set_tunnel(dest_host, port=dest_port, headers=headers)
-    conn.connect()
-    return conn
+from tcp_tls_tunnel.dto import AdapterOptions, TunnelOptions, ProxyOptions
+from tcp_tls_tunnel.create_tunnel_connection import create_tunnel_connection
 
 
 class TunneledHTTPAdapter(BaseAdapter):
 
     def __init__(self,
-                 tunnel_opts: TunnelOptions,
+                 adapter_opts: AdapterOptions,
                  proxy_opts: ProxyOptions = None):
         super(BaseAdapter, self).__init__()
-        self.tunnel_opts = tunnel_opts
+        self.adapter_opts = adapter_opts
         self.proxy = proxy_opts
 
     def close(self):
@@ -52,17 +25,31 @@ class TunneledHTTPAdapter(BaseAdapter):
 
     def send(self, request, **kwargs):
         parsed_url = urlparse(request.url)
+        secure = False
 
         if parsed_url.port:
             destination_port = parsed_url.port
+        elif parsed_url.scheme == 'https':
+            secure = True
+            destination_port = 443
+        elif parsed_url.scheme == 'http':
+            destination_port = 80
         else:
-            destination_port = 443 if self.tunnel_opts.secure else 80
+            raise ValueError("Unexpected url protocol. You can specify port in the url.")
 
-        connection = create_tunnel_connection(
-            tunnel_opts=self.tunnel_opts,
+        connection, proto = create_tunnel_connection(
+            tunnel_opts=TunnelOptions(
+                host=self.adapter_opts.host,
+                port=self.adapter_opts.port,
+                auth_login=self.adapter_opts.auth_login,
+                auth_password=self.adapter_opts.auth_password,
+                client=self.adapter_opts.client,
+                secure=secure,
+                http2=False
+            ),
             dest_host=parsed_url.hostname,
             dest_port=destination_port,
-            server_name=parsed_url.hostname,
+            server_name=None,  # TODO: server_name
             proxy=self.proxy
         )
 

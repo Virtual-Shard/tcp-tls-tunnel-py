@@ -8,19 +8,19 @@ from requests import Response
 
 from tests.test_settings import TEST_TUNNEL_HOST
 from tests.test_utils import (
-    get_test_tunnel_options,
-    get_test_proxy_options,
-    get_test_requests_session
+    get_test_adapter_options,
+    get_test_proxy_options
 )
+from tests.get_test_requests_session import get_test_requests_session
 from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
-from tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tcp_tls_tunnel.requests_adapter import TunneledHTTPAdapter
 
 
 class TestTunnelRequestWithProxy(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=get_test_tunnel_options(),
+            adapter_opts=get_test_adapter_options(),
             proxy_opts=get_test_proxy_options()
         )
         self.session = get_test_requests_session(adapter=self.adapter)
@@ -38,7 +38,7 @@ class TestHTTP11HowsMySSLRequest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunneledHTTPAdapter(
-            tunnel_opts=get_test_tunnel_options()
+            adapter_opts=get_test_adapter_options()
         )
         self.session = get_test_requests_session(adapter=self.adapter)
 

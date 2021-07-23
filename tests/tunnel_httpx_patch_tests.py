@@ -21,15 +21,15 @@ import jsondiff
 from httpx import Client, Response
 
 from tests.test_settings import TEST_TUNNEL_HOST
-from tests.test_utils import get_test_tunnel_options
+from tests.test_utils import get_test_adapter_options
 from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
-from tls_tunnel.httpx_adapter import TunnelHTTPTransport
+from tcp_tls_tunnel.httpx_adapter import TunnelHTTPTransport
 
 
 class TestTunnelHttpxHttp20Request(unittest.TestCase):
     def setUp(self) -> None:
         self.transport = TunnelHTTPTransport(
-            adapter_opts=get_test_tunnel_options()
+            adapter_opts=get_test_adapter_options()
         )
 
     def test_tunnel_ip_request(self):

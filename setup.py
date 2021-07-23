@@ -5,19 +5,10 @@ BASE_DIR = pathlib.Path(__file__).parent
 README = (BASE_DIR / "README.md").read_text()
 
 
-httpx_requirements = [
-    "h2>=4.0",
-    "httpx>=0.18.2",
-]
-hyper_requirements = [
-    "h2>=2.6.2,<3.0",
-]
-
-
 setup(
-    name="tls-tunnel",
-    version='0.5.5',
-    description="TLS TCP tunnel for HTTP requests",
+    name="tcp-tls-tunnel",
+    version='1.0.0',
+    description="TCP TLS tunnel for HTTP requests with HTTP2 support.",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/Virtual-Shard/tcp-tls-tunnel-py",
@@ -30,10 +21,14 @@ setup(
     include_package_data=True,
     packages=find_packages(exclude=("tests",)),
     extras_require={
-        "httpx": httpx_requirements,
-        "hyper": hyper_requirements,
-    },
-    dependency_links=[
-        'hyper@https://github.com/Lukasa/hyper/archive/development.tar.gz'
-    ]
+        "httpx": [
+            "h2>=4.0,<5.0",
+            "httpx>=0.18.2"
+        ],
+        "hyper": [
+            "h2>=2.6.2,<3.0",
+            "hpack>=3.0.0,<4.0",
+            "hyper>=0.7.0,<0.8.0"
+        ],
+    }
 )
