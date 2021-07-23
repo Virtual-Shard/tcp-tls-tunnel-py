@@ -204,7 +204,8 @@ class TunnelHTTP11Connection(HTTP11Connection):
                 proxy=self.proxy_opts,
                 dest_host=self.host,
                 dest_port=self.port,
-                server_name=None  # TODO: server_name
+                server_name=None,  # TODO: server_name
+                timeout=self.timeout
             )
 
             sock = BufferedSocket(sock, self.network_buffer_size)
