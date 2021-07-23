@@ -1,4 +1,4 @@
-# TCP TLS Tunnel Adapter for Python
+# TCP TLS Tunnel Adapters for Python
 
 Provides functionality for creating a TCP-TLS tunnel for HTTP / HTTPS 
 requests. Currently supported libraries are `request`, `hyper` and `httpx`. 
