@@ -19,16 +19,17 @@ import jsondiff
 from requests import Response
 
 from tests.test_settings import TEST_TUNNEL_HOST
-from tests.test_utils import get_test_tunnel_options, get_test_requests_session
+from tests.get_test_requests_session import get_test_requests_session
+from tests.test_utils import get_test_adapter_options
 from tests.validation_data import HOWSMYSSL_VALIDATION_RESPONSE
-from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
+from tcp_tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
 
 
 class TestHTTP20Requests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunnelHTTP20Adapter(
-            adapter_opts=get_test_tunnel_options(secure=True, http2=True)
+            adapter_opts=get_test_adapter_options(secure=True, http2=True)
         )
         self.session = get_test_requests_session(adapter=self.adapter)
 

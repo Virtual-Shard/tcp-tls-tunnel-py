@@ -1,6 +1,6 @@
 from base64 import b64encode
 
-from tls_tunnel.dto import ProxyOptions
+from tcp_tls_tunnel.dto import ProxyOptions
 
 
 def generate_basic_header(login: str, password: str):

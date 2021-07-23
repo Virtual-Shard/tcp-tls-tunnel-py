@@ -23,9 +23,9 @@ Let's show, how it works for `requests` in case of HTTP/1.1:
 
 ```python
 from requests import Session
-from tls_tunnel.requests_adapter import TunneledHTTPAdapter
-from tls_tunnel.constants import Client
-from tls_tunnel.dto import TunnelOptions, ProxyOptions
+from tcp_tls_tunnel.requests_adapter import TunneledHTTPAdapter
+from tcp_tls_tunnel.constants import Client
+from tcp_tls_tunnel.dto import AdapterOptions, ProxyOptions
 
 
 # if necessary
@@ -36,25 +36,12 @@ proxy_opts = ProxyOptions(
     auth_password="YOUR_PASSWORD",
 )
 
-httpAdapter = TunneledHTTPAdapter(
-    tunnel_opts=TunnelOptions(
+adapter = TunneledHTTPAdapter(
+    adapter_opts=AdapterOptions(
         host="127.0.0.1",  # tunnel address
         port=1337,  # tunnel port
         auth_login="YOUR_LOGIN",
         auth_password="YOUR_PASSWORD",
-        secure=True,  # True - TLS, False - TCP
-        client=Client.CHROME,  # imitated Client that will be used
-    ),
-    proxy_opts=proxy_opts  # or None if not required
-)
-
-httpsAdapter = TunneledHTTPAdapter(
-    tunnel_opts=TunnelOptions(
-        host="127.0.0.1",  # tunnel address
-        port=1337,  # tunnel port
-        auth_login="YOUR_LOGIN",
-        auth_password="YOUR_PASSWORD",
-        secure=False,  # True - TLS, False - TCP
         client=Client.CHROME,  # imitated Client that will be used
     ),
     proxy_opts=proxy_opts  # or None if not required
@@ -63,8 +50,8 @@ httpsAdapter = TunneledHTTPAdapter(
 session = Session()
 
 # connect adapter for requests.Session instance
-session.mount("http://", httpAdapter)
-session.mount("https://", httpsAdapter)
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 ```
 
 Request to `howsmyssl.com`:
@@ -124,8 +111,8 @@ pip install 'tls-tunnel[hyper]'
 Let's show, how it works for `requests` in case of HTTP/2.0:
 ```python
 import requests
-from tls_tunnel.dto import ProxyOptions, AdapterOptions
-from tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
+from tcp_tls_tunnel.dto import ProxyOptions, AdapterOptions
+from tcp_tls_tunnel.hyper_http2_adapter import TunnelHTTP20Adapter
 
 
 adapter = TunnelHTTP20Adapter(
@@ -175,8 +162,8 @@ pip install 'tls-tunnel[httpx]'
 #### Example
 Let's show, how it works for `httpx` in case of HTTP/2.0:
 ```python
-from tls_tunnel.dto import AdapterOptions, ProxyOptions
-from tls_tunnel.httpx_adapter import TunnelHTTPTransport
+from tcp_tls_tunnel.dto import AdapterOptions, ProxyOptions
+from tcp_tls_tunnel.httpx_adapter import TunnelHTTPTransport
 
 transport = TunnelHTTPTransport(
     adapter_opts=AdapterOptions(

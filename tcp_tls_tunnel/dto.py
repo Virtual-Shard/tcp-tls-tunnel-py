@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from tls_tunnel.constants import Client
+from tcp_tls_tunnel.constants import Client
 
 
 @dataclass

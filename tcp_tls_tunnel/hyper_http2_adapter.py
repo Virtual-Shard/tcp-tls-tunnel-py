@@ -1,51 +1,14 @@
-import socket
 import ssl
-from typing import Tuple
 
 from urllib.parse import urlparse
 from hyper import HTTP11Connection, HTTPConnection
 from hyper.common.bufsocket import BufferedSocket
 from hyper.common.exceptions import TLSUpgrade
-from hyper.common.util import to_native_string
 from hyper.contrib import HTTP20Adapter
 from hyper.tls import init_context
 
-from tls_tunnel.dto import ProxyOptions, AdapterOptions
-from tls_tunnel.utils import generate_basic_header
-from tls_tunnel.exceptions import ProxyError
-
-
-def _create_tunnel(proxy_host: str,
-                   proxy_port: int,
-                   target_host: str,
-                   target_port: int,
-                   proxy_headers: dict = None,
-                   timeout: int = None) -> Tuple[socket.socket, str]:
-    """
-    Sends CONNECT method to a proxy and returns a socket with established
-    connection to the target.
-
-    :returns: socket, proto
-    """
-    conn = HTTP11Connection(proxy_host, proxy_port, timeout=timeout)
-    conn.request('CONNECT', '%s:%d' % (target_host, target_port),
-                 headers=proxy_headers)
-
-    resp = conn.get_response()
-
-    try:
-        proto = resp.headers.get("Alpn-Protocol")[0].decode('utf-8')
-    except TypeError:
-        proto = 'http/1.1'
-
-    if resp.status != 200:
-        raise ProxyError(
-            "Tunnel connection failed: %d %s" %
-            (resp.status, to_native_string(resp.reason)),
-            response=resp
-        )
-
-    return getattr(conn, "_sock"), proto
+from tcp_tls_tunnel.create_tunnel_connection import create_tunnel_connection
+from tcp_tls_tunnel.dto import ProxyOptions, AdapterOptions, TunnelOptions
 
 
 class TunnelHTTP20Adapter(HTTP20Adapter):
@@ -137,8 +100,17 @@ class TunnelHTTPConnection(HTTPConnection):
                          proxy_headers=proxy_headers,
                          timeout=timeout,
                          **kwargs)
+
         self._conn = TunnelHTTP11Connection(
-            adapter_opts=adapter_opts,
+            tunnel_opts=TunnelOptions(
+                host=adapter_opts.host,
+                port=adapter_opts.port,
+                auth_login=adapter_opts.auth_login,
+                auth_password=adapter_opts.auth_password,
+                client=adapter_opts.client,
+                secure=secure,
+                http2=True
+            ),
             proxy_opts=proxy_opts,
             host=self._host,
             port=self._port,
@@ -152,18 +124,18 @@ class TunnelHTTPConnection(HTTPConnection):
 
 class TunnelHTTP11Connection(HTTP11Connection):
     def __init__(self,
-                 adapter_opts: AdapterOptions,
+                 tunnel_opts: TunnelOptions,
                  proxy_opts: ProxyOptions = None,
-                 host=None, port=None, secure=None, ssl_context=None,
+                 host=None, port=None, ssl_context=None,
                  proxy_host=None, proxy_port=None, proxy_headers=None,
                  timeout=None,
                  **kwargs):
         super(TunnelHTTP11Connection, self).__init__(host=host, port=port,
-                                                     secure=secure, ssl_context=ssl_context,
+                                                     secure=tunnel_opts.secure, ssl_context=ssl_context,
                                                      proxy_host=proxy_host, proxy_port=proxy_port,
                                                      proxy_headers=proxy_headers, timeout=timeout,
                                                      **kwargs)
-        self.adapter_opts = adapter_opts
+        self.tunnel_opts = tunnel_opts
         self.proxy_opts = proxy_opts
 
     def connect(self):
@@ -176,21 +148,10 @@ class TunnelHTTP11Connection(HTTP11Connection):
         if self._sock is None:
 
             # Tunnel socket creation with tunnel's TLS proto
-            sock, proto = _create_tunnel(
-                target_host=self.host,
-                target_port=self.port,
-                proxy_host=self.adapter_opts.host,
-                proxy_port=self.adapter_opts.port,
-                proxy_headers={
-                    "Authorization": generate_basic_header(self.adapter_opts.auth_login,
-                                                           self.adapter_opts.auth_password),
-                    "Client": self.adapter_opts.client.value,
-                    "Connection": 'keep-alive',
-                    "Server-Name": self.host,
-                    "Host": self.host,
-                    "Secure": str(1 if self.secure is True else 0),
-                    "HTTP2": "1",
-                }
+            sock, proto = create_tunnel_connection(
+                tunnel_opts=self.tunnel_opts,
+                proxy=self.proxy_opts,
+                server_name=None  # TODO: server_name
             )
 
             sock = BufferedSocket(sock, self.network_buffer_size)

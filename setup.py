@@ -7,7 +7,7 @@ README = (BASE_DIR / "README.md").read_text()
 
 setup(
     name="tcp-tls-tunnel",
-    version='0.9.2',
+    version='1.0.0',
     description="TCP TLS tunnel for HTTP requests with HTTP2 support.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -23,11 +23,11 @@ setup(
     extras_require={
         "httpx": [
             "h2>=4.0,<5.0",
-            "httpx>=0.18.2",
-            "hyper>=0.7.0,<0.8.0"
+            "httpx>=0.18.2"
         ],
         "hyper": [
             "h2>=2.6.2,<3.0",
+            "hpack>=3.0.0,<4.0",
             "hyper>=0.7.0,<0.8.0"
         ],
     }

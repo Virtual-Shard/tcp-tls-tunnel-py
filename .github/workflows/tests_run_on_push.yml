@@ -31,9 +31,9 @@ jobs:
           if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi
       - name: Code static analysis with flake8
         run: |
-          flake8 tls_tunnel/ --count --select=E5,E9,F63,F7,F82 --ignore=E501,E24,W504 --show-source --statistic
+          flake8 tcp_tls_tunnel/ --count --select=E5,E9,F63,F7,F82 --ignore=E501,E24,W504 --show-source --statistic
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 tls_tunnel/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          flake8 tcp_tls_tunnel/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Run test cases - Requests
         run: |
           python -m unittest -v tests/*_tests.py

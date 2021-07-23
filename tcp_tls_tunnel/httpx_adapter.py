@@ -6,13 +6,12 @@ from typing import Union, Tuple
 from httpcore import SyncConnectionPool
 from httpcore._backends.sync import SyncBackend, SyncSocketStream
 from httpcore._sync.connection import SyncHTTPConnection
-from httpx import Client, HTTPTransport, create_ssl_context, Limits
+from httpx import HTTPTransport, create_ssl_context, Limits
 from httpx._config import DEFAULT_LIMITS
 from httpx._types import VerifyTypes, CertTypes
 
-from tls_tunnel.dto import AdapterOptions, ProxyOptions
-from tls_tunnel.hyper_http2_adapter import _create_tunnel
-from tls_tunnel.utils import generate_basic_header
+from tcp_tls_tunnel.dto import AdapterOptions, ProxyOptions, TunnelOptions
+from tcp_tls_tunnel.requests_adapter import create_tunnel_connection
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -98,21 +97,20 @@ class TunnelHTTP20SyncConnectionPool(SyncConnectionPool):
         host, port = origin[1].decode("utf-8"), origin[2]
         secure = int("https" == origin[0].decode("utf-8"))
 
-        sock, proto = _create_tunnel(
-            target_host=host,
-            target_port=port,
-            proxy_host=self.adapter_opts.host,
-            proxy_port=self.adapter_opts.port,
-            proxy_headers={
-                "Authorization": generate_basic_header(self.adapter_opts.auth_login,
-                                                       self.adapter_opts.auth_password),
-                "Client": self.adapter_opts.client.value,
-                "Connection": 'keep-alive',
-                "Server-Name": host,
-                "Host": host,
-                "Secure": str(secure),
-                "HTTP2": "1",
-            }
+        conn, proto = create_tunnel_connection(
+            tunnel_opts=TunnelOptions(
+                host=self.adapter_opts.host,
+                port=self.adapter_opts.port,
+                auth_login=self.adapter_opts.auth_login,
+                auth_password=self.adapter_opts.auth_password,
+                client=self.adapter_opts.client,
+                secure=True if secure == 1 else False,
+                http2=True
+            ),
+            dest_host=host,
+            dest_port=port,
+            proxy=self.proxy_opts,
+            server_name=None  # TODO: server_name
         )
 
         return SyncHTTPConnection(
@@ -123,7 +121,7 @@ class TunnelHTTP20SyncConnectionPool(SyncConnectionPool):
             uds=self._uds,
             ssl_context=self._ssl_context,
             local_address=self._local_address,
-            socket=TunnelSyncSocketStream(sock=sock, proto=proto),
+            socket=TunnelSyncSocketStream(sock=conn.sock, proto=proto),
             retries=self._retries,
             backend=self._backend,
         )
