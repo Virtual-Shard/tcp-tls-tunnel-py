@@ -187,6 +187,7 @@ class TunnelHTTP11Connection(HTTP11Connection):
                                                      **kwargs)
         self.tunnel_opts = tunnel_opts
         self.proxy_opts = proxy_opts
+        self.timeout = timeout
 
     def connect(self):
         """
@@ -207,7 +208,7 @@ class TunnelHTTP11Connection(HTTP11Connection):
             )
 
             sock = BufferedSocket(sock, self.network_buffer_size)
-            # sock.settimeout(read_timeout)  # Set read timeout
+            sock.settimeout(self.timeout)  # Set read timeout
 
             if self.secure is not True:
                 proto = 'http/1.1'
