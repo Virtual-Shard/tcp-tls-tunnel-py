@@ -29,7 +29,7 @@ class TestHTTP20Requests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.adapter = TunnelHTTP20Adapter(
-            adapter_opts=get_test_adapter_options(secure=True, http2=True)
+            adapter_opts=get_test_adapter_options()
         )
         self.session = get_test_requests_session(adapter=self.adapter)
 
