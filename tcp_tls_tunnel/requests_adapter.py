@@ -49,7 +49,7 @@ class TunneledHTTPAdapter(BaseAdapter):
             ),
             dest_host=parsed_url.hostname,
             dest_port=destination_port,
-            server_name=request.server_name,  # TODO: server_name
+            server_name=None,  # TODO: server_name
             proxy=self.proxy
         )
 
