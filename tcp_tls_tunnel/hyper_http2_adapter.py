@@ -120,6 +120,7 @@ class TunnelHTTP20Adapter(HTTP20Adapter):
                 ssl_context=ssl_context,
                 proxy_host=proxy_netloc,
                 proxy_headers=proxy_headers,
+                enable_push=True,
                 timeout=timeout,
             )
             self.connections[connection_key] = conn
