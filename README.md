@@ -185,7 +185,12 @@ Request to `http2.pro`:
 ```python
 from httpx import Client
 
-with Client(transport=transport) as client:
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
+}
+
+with Client(transport=transport, headers=headers) as client:
     response = client.get("https://http2.pro/api/v1")
     print(response.json())
 ```
