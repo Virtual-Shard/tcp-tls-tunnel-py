@@ -7,7 +7,7 @@ README = (BASE_DIR / "README.md").read_text()
 
 setup(
     name="tcp-tls-tunnel",
-    version='1.0.0',
+    version='1.0.1',
     description="TCP TLS tunnel for HTTP requests with HTTP2 support.",
     long_description=README,
     long_description_content_type="text/markdown",
