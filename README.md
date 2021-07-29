@@ -146,7 +146,7 @@ Output:
 {
     'http2': 1, 
     'protocol': 'HTTP/2.0', 
-    'push': 0, 
+    'push': 1, 
     'user_agent': 'python-requests/2.24.0'
 }
 ```
@@ -201,7 +201,7 @@ Output:
     'http2': 1, 
     'protocol': 'HTTP/2.0', 
     'push': 0, 
-    'user_agent': 'python-httpx/0.18.2'
+    'user_agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'
 }
 ```
 
