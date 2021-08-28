@@ -1,5 +1,8 @@
 from urllib.parse import urlparse
 
+import gzip
+import brotli
+import zlib
 import requests
 
 import requests.cookies
@@ -71,7 +74,16 @@ class TunneledHTTPAdapter(BaseAdapter):
 
             # Added content to response
             # (under the hood it will set r.text and allow r.json() operation)
-            response._content = r.read()
+            content_encoding = response.headers.get("Content-Encoding")
+            if content_encoding == "gzip":
+                response._content = gzip.decompress(r.read())
+            elif content_encoding == "br":
+                response._content = brotli.decompress(r.read())
+            elif content_encoding == "deflate":
+                response._content = inflate(r.read())
+            else:
+                response._content = r.read()
+
             response.encoding = requests.utils.get_encoding_from_headers(
                 response.headers
             )
@@ -84,3 +96,13 @@ class TunneledHTTPAdapter(BaseAdapter):
             connection.close()
 
         return response
+
+
+def inflate(data):
+    """Used for deflate Content-Encoding"""
+    decompress = zlib.decompressobj(
+            -zlib.MAX_WBITS  # see above
+    )
+    inflated = decompress.decompress(data)
+    inflated += decompress.flush()
+    return inflated
