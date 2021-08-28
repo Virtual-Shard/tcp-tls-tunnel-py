@@ -3,6 +3,7 @@ from typing import List
 
 import jsondiff
 import unittest
+import shutil
 
 from requests import Response
 
@@ -41,6 +42,16 @@ class TestHTTP11HowsMySSLRequest(unittest.TestCase):
             adapter_opts=get_test_adapter_options()
         )
         self.session = get_test_requests_session(adapter=self.adapter)
+
+    def test_image_downloading(self):
+        url = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2880px-Google_2015_logo.svg.png"
+        res = self.session.get(url, stream=True)
+        with open("imager.png", mode="wb") as f:
+            f.write(res.content)
+            # for chunk in res.iter_content():
+            #     f.write(chunk)
+            # f.flush()
+
 
     def test_tunnel_request(self):
         response_json: dict = self.session.get('https://www.howsmyssl.com/a/check').json()
